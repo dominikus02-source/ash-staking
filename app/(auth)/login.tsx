@@ -50,7 +50,7 @@ export default function LoginScreen() {
       }
       
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Login to ASH STAKING',
+        promptMessage: 'Login to ASH COIN STAKING',
         fallbackLabel: 'Use Password',
       });
       
@@ -140,7 +140,7 @@ export default function LoginScreen() {
                 <Text style={styles.logoText}>AS</Text>
               </LinearGradient>
             </View>
-            <Text style={styles.title}>ASH STAKING</Text>
+            <Text style={styles.title}>ASH COIN STAKING</Text>
             <Text style={styles.subtitle}>Stake & Earn Rewards</Text>
           </View>
 

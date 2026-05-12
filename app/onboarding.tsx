@@ -20,7 +20,7 @@ const { width, height } = Dimensions.get('window');
 const ONBOARDING_DATA = [
   {
     id: '1',
-    title: 'Welcome to ASH STAKING',
+    title: 'Welcome to ASH COIN STAKING',
     subtitle: 'Your gateway to smart cryptocurrency staking with guaranteed returns.',
     icon: (
       <LinearGradient

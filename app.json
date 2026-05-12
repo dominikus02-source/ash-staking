@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ASH STAKING",
-    "slug": "ash-staking",
+    "name": "ASH COIN STAKING",
+    "slug": "ash-coin-staking",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ash-icon.png",
-    "scheme": "ashstaking",
+    "scheme": "ashcoinstaking",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/ash-splash.png",

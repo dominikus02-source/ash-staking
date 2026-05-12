@@ -112,7 +112,7 @@ export default function RegisterScreen() {
       await AsyncStorage.setItem('userSession', 'email');
       
       Alert.alert(
-        'Welcome to ASH STAKING! 🎉',
+        'Welcome to ASH COIN STAKING! 🎉',
         'Your account has been created successfully.',
         [{ text: 'Continue', onPress: () => router.replace('/onboarding') }]
       );
@@ -161,8 +161,8 @@ export default function RegisterScreen() {
               >
                 <Text style={styles.logoText}>AS</Text>
               </LinearGradient>
-              <Text style={styles.title}>Create Account</Text>
-              <Text style={styles.subtitle}>Join ASH STAKING and start earning</Text>
+<Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join ASH COIN STAKING and start earning</Text>
             </View>
 
             {/* Form */}
