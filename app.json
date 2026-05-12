@@ -17,19 +17,18 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ashcoin.staking",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Use Face ID for quick and secure login",
-        "NSPhotoLibraryUsageDescription": "We need access to your photos to update your profile picture",
-        "NSCameraUsageDescription": "We need camera access to take profile photos"
+        "NSFaceIDUsageDescription": "Use Face ID for quick and secure login to ASH COIN STAKING",
+        "NSPhotoLibraryUsageDescription": "Allow ASH COIN STAKING to access your photos to update your profile picture",
+        "NSCameraUsageDescription": "Allow ASH COIN STAKING to access your camera to take profile photos",
+        "UIBackgroundModes": ["fetch", "remote-notification"]
       },
       "buildNumber": "1",
-      "appTransportSecurity": {
-        "exceptionDomains": []
-      }
+      "appStoreUrl": "https://apps.apple.com/app/ash-coin-staking/idYOUR_APP_ID"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#667eea"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "package": "com.ashcoin.staking",
       "googleServicesFile": "./google-services.json",
@@ -40,7 +39,11 @@
         "INTERNET",
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_NETWORK_STATE",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
       ],
       "config": {
         "googleSignIn": {
