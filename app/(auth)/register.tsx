@@ -16,6 +16,9 @@ import { useRouter, Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Mail, Lock, User, Gift } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth, registerUser } from '../../src/lib/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -93,21 +96,34 @@ export default function RegisterScreen() {
     setLoading(true);
     
     try {
-      // Simulate registration - Replace with actual Firebase/Auth logic
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Register with Firebase
+      await createUserWithEmailAndPassword(auth, formData.email.trim(), formData.password);
+      await updateProfile(auth.currentUser!, { displayName: formData.fullName.trim() });
       
-      // Check if there's a referral code and give bonus
-      if (formData.referralCode.trim()) {
-        Alert.alert(
-          'Welcome Bonus!',
-          'You received a bonus for using a referral code!',
-          [{ text: 'Continue', onPress: () => router.replace('/onboarding') }]
-        );
-      } else {
-        router.replace('/onboarding');
-      }
+      // Store user data in Firestore
+      await registerUser(
+        formData.email.trim(),
+        formData.password,
+        formData.fullName.trim(),
+        formData.referralCode.trim() || undefined
+      );
+      
+      // Save session
+      await AsyncStorage.setItem('userSession', 'email');
+      
+      Alert.alert(
+        'Welcome to ASH STAKING! 🎉',
+        'Your account has been created successfully.',
+        [{ text: 'Continue', onPress: () => router.replace('/onboarding') }]
+      );
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.message || 'An error occurred.');
+      const errorMap: Record<string, string> = {
+        'auth/email-already-in-use': 'This email is already registered.',
+        'auth/invalid-email': 'Invalid email format.',
+        'auth/weak-password': 'Password is too weak.',
+        'auth/network-request-failed': 'Network error. Please check your connection.',
+      };
+      Alert.alert('Registration Failed', errorMap[error.code] || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -278,6 +294,7 @@ export default function RegisterScreen() {
                     maxLength={6}
                   />
                 </View>
+                <Text style={styles.inputHint}>Get bonus when registering with a referral code</Text>
               </View>
 
               {/* Terms Agreement */}
@@ -427,6 +444,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 12,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: '#8e8e93',
+    marginTop: 6,
   },
   termsContainer: {
     flexDirection: 'row',

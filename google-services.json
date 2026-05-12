@@ -14,22 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "478194785561-5reir02emia7rq6srssc30p1ki6vm4vt.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.ashcoin.app",
-            "certificate_hash": "4459b9ed7e583b587d6de5a2eda1cb5656a84760"
-          }
-        },
-        {
-          "client_id": "478194785561-9ntjgdjkbr1ojlq62trsmv53i49gpp5u.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.ashcoin.app",
-            "certificate_hash": "5468a6f5edf407bc278a0e7d9db558361c4d369c"
-          }
-        },
-        {
           "client_id": "478194785561-f0qvj67vjln41855vltbeudjpt5vcd66.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

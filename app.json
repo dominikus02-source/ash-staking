@@ -15,7 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ashstaking.app",
+      "bundleIdentifier": "com.ashprotocol.staking",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Use Face ID for quick and secure login"
       }
@@ -25,7 +25,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ashstaking.app",
+      "package": "com.ashprotocol.staking",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "USE_BIOMETRIC",
         "USE_FINGERPRINT"

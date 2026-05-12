@@ -8,6 +8,7 @@ import {
   Dimensions,
   Animated,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,18 +18,15 @@ import {
   Wallet,
   PiggyBank,
   Users,
-  ChevronRight,
   Bell,
   ArrowDownLeft,
   ArrowUpRight,
   Clock,
-  Star,
   Gift,
-  Activity,
-  BarChart3,
   RefreshCw,
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth, subscribeToUserData, signOut, UserData } from '../../src/lib/firebase';
 
 const { width } = Dimensions.get('window');
 
@@ -41,50 +39,39 @@ interface QuickAction {
   route: string;
 }
 
-interface Transaction {
-  id: string;
-  title: string;
-  type: 'in' | 'out';
-  amount: string;
-  date: string;
-}
-
 export default function HomeScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [userName, setUserName] = useState('User');
-  const [balance, setBalance] = useState('0.00');
-  const [totalEarned, setTotalEarned] = useState('0.00');
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<UserData | null>(null);
   
   const balanceAnim = new Animated.Value(0);
 
   useEffect(() => {
-    loadUserData();
+    const unsubscribe = subscribeToUserData(auth.currentUser?.uid || '', (data) => {
+      setUserData(data);
+      setLoading(false);
+    });
+
     Animated.timing(balanceAnim, {
       toValue: 1,
       duration: 1000,
       useNativeDriver: true,
     }).start();
-  }, []);
 
-  const loadUserData = async () => {
-    try {
-      const storedName = await AsyncStorage.getItem('userName');
-      if (storedName) {
-        setUserName(storedName);
-      }
-      // Mock data - Replace with actual data from your backend
-      setBalance('1,234.56');
-      setTotalEarned('89.45');
-    } catch (error) {
-      console.log('Error loading user data:', error);
-    }
-  };
+    return () => unsubscribe();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadUserData();
-    setRefreshing(false);
+    // Data will refresh automatically via onSnapshot
+    setTimeout(() => setRefreshing(false), 1000);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    await AsyncStorage.clear();
+    router.replace('/(auth)/login');
   };
 
   const quickActions: QuickAction[] = [
@@ -138,13 +125,6 @@ export default function HomeScreen() {
     },
   ];
 
-  const recentTransactions: Transaction[] = [
-    { id: '1', title: 'Staking Reward', type: 'in', amount: '+12.50 ASH', date: 'Today, 09:30' },
-    { id: '2', title: 'Task Completed', type: 'in', amount: '+5.00 ASH', date: 'Today, 08:15' },
-    { id: '3', title: 'Stake Deposit', type: 'out', amount: '-50.00 ASH', date: 'Yesterday' },
-    { id: '4', title: 'Referral Bonus', type: 'in', amount: '+2.50 ASH', date: '2 days ago' },
-  ];
-
   const renderQuickAction = (action: QuickAction) => (
     <TouchableOpacity
       key={action.id}
@@ -165,30 +145,18 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const renderTransaction = (tx: Transaction) => (
-    <View key={tx.id} style={styles.transactionItem}>
-      <View style={[
-        styles.txIcon,
-        { backgroundColor: tx.type === 'in' ? '#e8f5e9' : '#ffebee' }
-      ]}>
-        {tx.type === 'in' ? (
-          <ArrowDownLeft size={20} color="#4caf50" />
-        ) : (
-          <ArrowUpRight size={20} color="#f44336" />
-        )}
-      </View>
-      <View style={styles.txInfo}>
-        <Text style={styles.txTitle}>{tx.title}</Text>
-        <Text style={styles.txDate}>{tx.date}</Text>
-      </View>
-      <Text style={[
-        styles.txAmount,
-        { color: tx.type === 'in' ? '#4caf50' : '#f44336' }
-      ]}>
-        {tx.amount}
-      </Text>
-    </View>
-  );
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#667eea" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const totalBalance = (userData?.fundingBalance || 0) + (userData?.tradingBalance || 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -207,12 +175,17 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Hello,</Text>
-            <Text style={styles.userName}>{userName}</Text>
+            <Text style={styles.userName}>{userData?.displayName || 'User'}</Text>
           </View>
-          <TouchableOpacity style={styles.notificationBtn}>
-            <Bell size={24} color="#1c1c1e" />
-            <View style={styles.notificationBadge} />
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.notificationBtn}>
+              <Bell size={24} color="#1c1c1e" />
+              <View style={styles.notificationBadge} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Balance Card */}
@@ -241,19 +214,22 @@ export default function HomeScreen() {
               }),
             }],
           }}>
-            <Text style={styles.balanceAmount}>{balance}</Text>
+            <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
             <Text style={styles.balanceCurrency}>ASH</Text>
           </Animated.View>
 
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Total Earned</Text>
-              <Text style={styles.statValue}>{totalEarned} ASH</Text>
+          {/* Wallet Breakdown */}
+          <View style={styles.walletBreakdown}>
+            <View style={styles.walletItem}>
+              <Wallet size={16} color="rgba(255,255,255,0.8)" />
+              <Text style={styles.walletLabel}>Trading</Text>
+              <Text style={styles.walletValue}>{(userData?.tradingBalance || 0).toFixed(2)}</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Active Stakes</Text>
-              <Text style={styles.statValue}>3</Text>
+            <View style={styles.walletDivider} />
+            <View style={styles.walletItem}>
+              <TrendingUp size={16} color="rgba(255,255,255,0.8)" />
+              <Text style={styles.walletLabel}>Funding (Locked)</Text>
+              <Text style={styles.walletValue}>{(userData?.fundingBalance || 0).toFixed(2)}</Text>
             </View>
           </View>
 
@@ -270,6 +246,25 @@ export default function HomeScreen() {
           </View>
         </LinearGradient>
 
+        {/* Quick Stats */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <TrendingUp size={20} color="#4caf50" />
+            <Text style={styles.statValue}>{(userData?.totalEarned || 0).toFixed(2)}</Text>
+            <Text style={styles.statLabel}>Total Earned</Text>
+          </View>
+          <View style={styles.statCard}>
+            <PiggyBank size={20} color="#667eea" />
+            <Text style={styles.statValue}>{userData?.stakes?.length || 0}</Text>
+            <Text style={styles.statLabel}>Active Stakes</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Users size={20} color="#43e97b" />
+            <Text style={styles.statValue}>{userData?.referralCount || 0}</Text>
+            <Text style={styles.statLabel}>Referrals</Text>
+          </View>
+        </View>
+
         {/* Quick Actions */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -280,42 +275,29 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Recent Transactions */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            <TouchableOpacity onPress={() => router.push('/(main)/history')}>
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.transactionsCard}>
-            {recentTransactions.map(renderTransaction)}
-          </View>
-        </View>
-
-        {/* Stats Overview */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Performance</Text>
-          </View>
-          <View style={styles.statsCard}>
-            <View style={styles.performanceItem}>
-              <BarChart3 size={24} color="#667eea" />
-              <Text style={styles.performanceValue}>22%</Text>
-              <Text style={styles.performanceLabel}>Best APY</Text>
+        {/* Staking Summary */}
+        {userData?.stakes && userData.stakes.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Active Stakes</Text>
+              <TouchableOpacity onPress={() => router.push('/(main)/staking')}>
+                <Text style={styles.seeAll}>View All</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.performanceItem}>
-              <Activity size={24} color="#4facfe" />
-              <Text style={styles.performanceValue}>$1.23</Text>
-              <Text style={styles.performanceLabel}>ASH Price</Text>
-            </View>
-            <View style={styles.performanceItem}>
-              <Star size={24} color="#f093fb" />
-              <Text style={styles.performanceValue}>5</Text>
-              <Text style={styles.performanceLabel}>Referrals</Text>
-            </View>
+            {userData.stakes.slice(0, 2).map((stake) => (
+              <View key={stake.id} style={styles.stakeCard}>
+                <View style={styles.stakeInfo}>
+                  <Text style={styles.stakeName}>{stake.packageName}</Text>
+                  <Text style={styles.stakeAmount}>{stake.amount} ASH @ {stake.apy}%</Text>
+                </View>
+                <View style={styles.stakeReward}>
+                  <Text style={styles.stakeRewardLabel}>Earned</Text>
+                  <Text style={styles.stakeRewardValue}>{stake.claimedReward.toFixed(2)}</Text>
+                </View>
+              </View>
+            ))}
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -325,6 +307,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f7',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#667eea',
   },
   scrollContent: {
     paddingBottom: 100,
@@ -345,6 +337,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#1c1c1e',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   notificationBtn: {
     width: 44,
@@ -367,6 +364,17 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#ff3b30',
+  },
+  logoutBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+  },
+  logoutText: {
+    fontSize: 14,
+    color: '#ff3b30',
+    fontWeight: '500',
   },
   balanceCard: {
     marginHorizontal: 20,
@@ -409,27 +417,28 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: -4,
   },
-  statsRow: {
+  walletBreakdown: {
     flexDirection: 'row',
-    marginTop: 24,
-    paddingTop: 20,
+    marginTop: 20,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
-  statItem: {
+  walletItem: {
     flex: 1,
+    alignItems: 'center',
+    gap: 4,
   },
-  statLabel: {
-    fontSize: 13,
+  walletLabel: {
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.7)',
   },
-  statValue: {
-    fontSize: 18,
+  walletValue: {
+    fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
-    marginTop: 4,
   },
-  statDivider: {
+  walletDivider: {
     width: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     marginHorizontal: 16,
@@ -459,6 +468,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     color: '#1c1c1e',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginTop: 16,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1c1c1e',
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#8e8e93',
+    marginTop: 4,
+    textAlign: 'center',
   },
   section: {
     marginTop: 28,
@@ -514,72 +553,42 @@ const styles = StyleSheet.create({
     color: '#8e8e93',
     marginTop: 4,
   },
-  transactionsCard: {
+  stakeCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: 8,
     elevation: 4,
   },
-  transactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f7',
-  },
-  txIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  txInfo: {
-    flex: 1,
-  },
-  txTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1c1c1e',
-  },
-  txDate: {
-    fontSize: 13,
-    color: '#8e8e93',
-    marginTop: 2,
-  },
-  txAmount: {
+  stakeInfo: {},
+  stakeName: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  statsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  performanceItem: {
-    alignItems: 'center',
-  },
-  performanceValue: {
-    fontSize: 24,
-    fontWeight: '700',
     color: '#1c1c1e',
-    marginTop: 8,
   },
-  performanceLabel: {
-    fontSize: 13,
+  stakeAmount: {
+    fontSize: 14,
     color: '#8e8e93',
+    marginTop: 4,
+  },
+  stakeReward: {
+    alignItems: 'flex-end',
+  },
+  stakeRewardLabel: {
+    fontSize: 12,
+    color: '#8e8e93',
+  },
+  stakeRewardValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4caf50',
     marginTop: 4,
   },
 });

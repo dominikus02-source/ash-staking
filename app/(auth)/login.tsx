@@ -9,8 +9,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Image,
-  Dimensions,
   Animated,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
@@ -18,8 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Fingerprint, Mail, Lock } from 'lucide-react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
-
-const { width } = Dimensions.get('window');
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth, loginUser } from '../../src/lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -56,6 +55,7 @@ export default function LoginScreen() {
       });
       
       if (result.success) {
+        await AsyncStorage.setItem('userSession', 'biometric');
         router.replace('/(main)/home');
       }
     } catch (error) {
@@ -79,34 +79,42 @@ export default function LoginScreen() {
     setLoading(true);
     
     try {
-      // Simulate login - Replace with actual Firebase/Auth logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await signInWithEmailAndPassword(auth, cleanEmail, password);
       
-      // Store auth state
-      // await AsyncStorage.setItem('user', JSON.stringify({ email: cleanEmail }));
+      // Save session
+      await AsyncStorage.setItem('userSession', 'email');
+      await AsyncStorage.setItem('userEmail', rememberMe ? cleanEmail : '');
       
       router.replace('/(main)/home');
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'An error occurred.');
+      const errorMap: Record<string, string> = {
+        'auth/user-not-found': 'Email not registered.',
+        'auth/wrong-password': 'Incorrect password.',
+        'auth/invalid-email': 'Invalid email format.',
+        'auth/too-many-requests': 'Too many attempts. Please try again later.',
+        'auth/invalid-credential': 'Invalid email or password.',
+      };
+      Alert.alert('Login Failed', errorMap[error.code] || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = () => {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address first.');
+      return;
+    }
+    
     Alert.alert(
       'Reset Password',
-      'Enter your email address and we will send you a password reset link.',
+      `Send password reset link to ${email}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Send', 
           onPress: () => {
-            if (email) {
-              Alert.alert('Success', 'Password reset link sent to your email.');
-            } else {
-              Alert.alert('Error', 'Please enter your email first.');
-            }
+            Alert.alert('Success', 'Password reset link sent to your email.');
           }
         },
       ]
