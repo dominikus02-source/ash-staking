@@ -1,0 +1,19 @@
+{
+  "dashboard": {
+    "greeting": "Node Connection,",
+    "balance_label": "ASH PROTOCOL BALANCE",
+    "mainnet_asset": "Mainnet Asset",
+    "hashrate": "HASHRATE",
+    "mine_now": "MINE NOW",
+    "claim_mined": "CLAIM MINED",
+    "claim_daily": "CLAIM DAILY BONUS",
+    "daily_claimed": "DAILY REWARD CLAIMED",
+    "bonus_alert_title": "🎉 Daily Bonus Claimed!",
+    "bonus_alert_msg": "Congratulations! You successfully received 0.005 ASH from the daily bonus.",
+    "bonus_alert_btn": "Awesome!",
+    "standard_boost": "Standard Boost",
+    "premium_boost": "Premium Boost",
+    "active": "Active",
+    "free": "FREE"
+  }
+}

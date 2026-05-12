@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — ASH Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #fbbf24;
+    --cyan: #00f2ff;
+    --bg: #080c14;
+    --bg2: #0f172a;
+    --bg3: #1e293b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e293b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(251,191,36,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(251,191,36,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--gold);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 16px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+  }
+
+  h1 {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: var(--cyan); }
+
+  .meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .meta-item strong {
+    color: var(--gold);
+    display: block;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .toc-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+  }
+
+  @media (max-width: 500px) { .toc ol { grid-template-columns: 1fr; } }
+
+  .toc li {
+    counter-increment: toc;
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero) ". ";
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    margin-right: 4px;
+  }
+
+  .toc a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .toc a:hover { color: var(--text); }
+
+  /* Sections */
+  section {
+    margin-bottom: 48px;
+    scroll-margin-top: 24px;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 6px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+  }
+
+  p {
+    font-size: 15px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+  }
+
+  ul, ol {
+    margin: 0 0 16px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  li {
+    font-size: 15px;
+    color: #94a3b8;
+    padding: 6px 0 6px 20px;
+    position: relative;
+  }
+
+  li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 10px;
+    top: 9px;
+  }
+
+  /* Info box */
+  .info-box {
+    background: rgba(0, 242, 255, 0.05);
+    border: 1px solid rgba(0, 242, 255, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  .info-box p {
+    color: #7dd3fc;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .warn-box {
+    background: rgba(251, 191, 36, 0.05);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  .warn-box p {
+    color: #fcd34d;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .data-table th {
+    background: var(--bg3);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+    vertical-align: top;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* Divider */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* Contact card */
+  .contact-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .contact-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .contact-card p {
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .contact-link.primary {
+    background: var(--gold);
+    color: #0f172a;
+  }
+
+  .contact-link.secondary {
+    background: var(--bg3);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .contact-link:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Footer */
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .footer-badge {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.2);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  a { color: var(--cyan); }
+
+  strong { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">A</div>
+      <div class="logo-text">ASH PROTOCOL</div>
+    </div>
+    <h1>Privacy <span>Policy</span></h1>
+    <div class="meta">
+      <div class="meta-item"><strong>EFFECTIVE DATE</strong>May 10, 2026</div>
+      <div class="meta-item"><strong>LAST UPDATED</strong>May 10, 2026</div>
+      <div class="meta-item"><strong>VERSION</strong>1.0.0</div>
+      <div class="meta-item"><strong>APP</strong>ASH COIN — com.ashcoin.app</div>
+    </div>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">TABLE OF CONTENTS</div>
+    <ol>
+      <li><a href="#s1">Information We Collect</a></li>
+      <li><a href="#s2">How We Use Information</a></li>
+      <li><a href="#s3">Data Sharing</a></li>
+      <li><a href="#s4">Data Storage & Security</a></li>
+      <li><a href="#s5">Third-Party Services</a></li>
+      <li><a href="#s6">Advertising</a></li>
+      <li><a href="#s7">Your Rights</a></li>
+      <li><a href="#s8">Children's Privacy</a></li>
+      <li><a href="#s9">Blockchain & Tokens</a></li>
+      <li><a href="#s10">Contact Us</a></li>
+    </ol>
+  </div>
+
+  <div class="info-box">
+    <p>This Privacy Policy describes how ASH Protocol ("we", "us", or "our") collects, uses, and shares information when you use the ASH COIN mobile application ("App"). By using the App, you agree to the practices described in this policy.</p>
+  </div>
+
+  <section id="s1">
+    <h2><span class="section-num">01</span> Information We Collect</h2>
+    <p>We collect information you provide directly to us and information generated automatically through your use of the App.</p>
+
+    <table class="data-table">
+      <tr>
+        <th>DATA TYPE</th>
+        <th>EXAMPLES</th>
+        <th>PURPOSE</th>
+      </tr>
+      <tr>
+        <td><strong>Account Data</strong></td>
+        <td>Email, display name, profile photo URL</td>
+        <td>Account creation and authentication</td>
+      </tr>
+      <tr>
+        <td><strong>Mining Data</strong></td>
+        <td>Mining sessions, hashrate, ASH balance, boost activity</td>
+        <td>Core app functionality</td>
+      </tr>
+      <tr>
+        <td><strong>Device Data</strong></td>
+        <td>Device type, OS version, unique device identifiers</td>
+        <td>App performance and security</td>
+      </tr>
+      <tr>
+        <td><strong>Usage Data</strong></td>
+        <td>Features used, session duration, click events</td>
+        <td>App improvement and analytics</td>
+      </tr>
+      <tr>
+        <td><strong>Referral Data</strong></td>
+        <td>Referral codes, referred users</td>
+        <td>Syndicate/team features</td>
+      </tr>
+      <tr>
+        <td><strong>Transaction Data</strong></td>
+        <td>Withdrawals, purchases, ledger entries</td>
+        <td>Financial record keeping</td>
+      </tr>
+    </table>
+  </section>
+
+  <section id="s2">
+    <h2><span class="section-num">02</span> How We Use Information</h2>
+    <p>We use the information we collect to:</p>
+    <ul>
+      <li>Provide, maintain, and improve the App and its features</li>
+      <li>Process mining sessions and calculate ASH token rewards</li>
+      <li>Authenticate your identity and secure your account</li>
+      <li>Send notifications about mining completion, boosts, and daily rewards</li>
+      <li>Process referral commissions and syndicate rewards</li>
+      <li>Comply with legal obligations and prevent fraud</li>
+      <li>Respond to your questions and support requests</li>
+      <li>Send administrative messages about your account</li>
+    </ul>
+  </section>
+
+  <section id="s3">
+    <h2><span class="section-num">03</span> Data Sharing</h2>
+    <p>We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:</p>
+    <ul>
+      <li><strong>Service Providers:</strong> Firebase (Google) for authentication, database, and storage services</li>
+      <li><strong>Advertising Partners:</strong> Google AdMob for serving advertisements within the App</li>
+      <li><strong>Legal Requirements:</strong> When required by law, court order, or governmental authority</li>
+      <li><strong>Business Transfer:</strong> In connection with a merger, acquisition, or sale of assets</li>
+      <li><strong>Consent:</strong> With your explicit consent for any other purpose</li>
+    </ul>
+    <div class="warn-box">
+      <p>⚠️ We never sell your personal data to advertisers or data brokers.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2><span class="section-num">04</span> Data Storage & Security</h2>
+    <p>Your data is stored on Google Firebase servers, which implement industry-standard security measures including encryption at rest and in transit.</p>
+    <ul>
+      <li>All data transmissions use TLS/SSL encryption</li>
+      <li>Firebase Security Rules restrict access to your data only to your account</li>
+      <li>Authentication tokens are stored securely on your device</li>
+      <li>We retain your data for as long as your account is active</li>
+      <li>You may request deletion of your account and associated data at any time</li>
+    </ul>
+    <div class="info-box">
+      <p>Your ASH balance and mining history are stored on our Firebase database. While we implement strong security measures, no system is 100% secure. Please use a strong, unique password for your account.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2><span class="section-num">05</span> Third-Party Services</h2>
+    <p>The App integrates third-party services that have their own privacy policies:</p>
+    <ul>
+      <li><strong>Google Firebase</strong> — Authentication, Firestore database, and cloud storage. <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase Privacy Policy</a></li>
+      <li><strong>Google Sign-In</strong> — Optional OAuth login. <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+      <li><strong>Google AdMob</strong> — In-app advertising to support free features. <a href="https://support.google.com/admob/answer/6128543" target="_blank">AdMob Privacy Policy</a></li>
+      <li><strong>Expo / React Native</strong> — Mobile app framework for push notifications</li>
+    </ul>
+    <p>We recommend reviewing the privacy policies of these third-party services.</p>
+  </section>
+
+  <section id="s6">
+    <h2><span class="section-num">06</span> Advertising</h2>
+    <p>The App displays advertisements served by Google AdMob to support our free mining features. By using the App:</p>
+    <ul>
+      <li>AdMob may collect your device's advertising ID (GAID/IDFA)</li>
+      <li>Ads may be personalized based on your interests and browsing behavior</li>
+      <li>You can opt out of personalized ads in your device settings</li>
+      <li>Watching rewarded ads is optional — it activates mining boosts</li>
+      <li>Banner ads are displayed at the bottom of the main screen</li>
+    </ul>
+    <div class="info-box">
+      <p>To opt out of personalized ads on Android: Settings → Google → Ads → Opt out of Ads Personalization. On iOS: Settings → Privacy → Tracking → disable "Allow Apps to Request to Track".</p>
+    </div>
+  </section>
+
+  <section id="s7">
+    <h2><span class="section-num">07</span> Your Rights</h2>
+    <p>Depending on your location, you may have the following rights regarding your personal data:</p>
+    <ul>
+      <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
+      <li><strong>Correction:</strong> Request correction of inaccurate data</li>
+      <li><strong>Deletion:</strong> Request deletion of your account and associated data</li>
+      <li><strong>Portability:</strong> Request your data in a machine-readable format</li>
+      <li><strong>Objection:</strong> Object to processing of your data for certain purposes</li>
+      <li><strong>Withdrawal:</strong> Withdraw consent at any time where processing is based on consent</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at the email below. We will respond within 30 days.</p>
+  </section>
+
+  <section id="s8">
+    <h2><span class="section-num">08</span> Children's Privacy</h2>
+    <div class="warn-box">
+      <p>⚠️ The ASH COIN App is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we discover that a child under 13 has provided us with personal information, we will delete it immediately. If you believe a child has provided us with their data, please contact us.</p>
+    </div>
+  </section>
+
+  <section id="s9">
+    <h2><span class="section-num">09</span> Blockchain & Token Disclaimer</h2>
+    <p>ASH tokens mined through the App are subject to the following:</p>
+    <ul>
+      <li>ASH tokens are currently in the pre-mainnet phase and may have no monetary value</li>
+      <li>Mining rewards are calculated by our servers and stored in our database</li>
+      <li>Token values, exchange rates, and withdrawal policies may change</li>
+      <li>We do not guarantee any specific token value or return on mining activity</li>
+      <li>Participation in mining is voluntary and at your own risk</li>
+      <li>KYC verification may be required before token withdrawal</li>
+    </ul>
+    <div class="warn-box">
+      <p>⚠️ Cryptocurrency and digital token investments carry significant risk. Never invest more than you can afford to lose.</p>
+    </div>
+  </section>
+
+  <section id="s10">
+    <h2><span class="section-num">10</span> Contact Us</h2>
+    <p>If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
+
+    <div class="contact-card">
+      <h3>ASH Protocol Team</h3>
+      <p>We're here to help with any privacy concerns or data requests.</p>
+      <div class="contact-links">
+        <a href="mailto:dominikus.02@gmail.com" class="contact-link primary">✉ Email Us</a>
+        <a href="https://t.me/ashcoin_official" class="contact-link secondary">Telegram</a>
+        <a href="https://discord.gg/ashprotocol" class="contact-link secondary">Discord</a>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <div class="info-box">
+    <p>We reserve the right to update this Privacy Policy at any time. We will notify you of significant changes via in-app notification or email. Continued use of the App after changes constitutes acceptance of the updated policy.</p>
+  </div>
+
+  <footer>
+    <p>© 2026 ASH Protocol. All rights reserved.</p>
+    <div class="footer-badge">PRIVACY POLICY v1.0</div>
+    <p>com.ashcoin.app</p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+{
+  "project_info": {
+    "project_number": "478194785561",
+    "project_id": "ashcoin-app",
+    "storage_bucket": "ashcoin-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478194785561:android:ba66c3e189aee527df7988",
+        "android_client_info": {
+          "package_name": "com.ashcoin.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "478194785561-5reir02emia7rq6srssc30p1ki6vm4vt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashcoin.app",
+            "certificate_hash": "4459b9ed7e583b587d6de5a2eda1cb5656a84760"
+          }
+        },
+        {
+          "client_id": "478194785561-9ntjgdjkbr1ojlq62trsmv53i49gpp5u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashcoin.app",
+            "certificate_hash": "5468a6f5edf407bc278a0e7d9db558361c4d369c"
+          }
+        },
+        {
+          "client_id": "478194785561-f0qvj67vjln41855vltbeudjpt5vcd66.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashcoin.app",
+            "certificate_hash": "532d5c34c240a248d5d4af5419f2a1f27beef8b4"
+          }
+        },
+        {
+          "client_id": "478194785561-gsb2c6j39kdd5eh8p5g3sp4gm07eb9r2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashcoin.app",
+            "certificate_hash": "189ed415972208ae16f6024f39007e069378edc1"
+          }
+        },
+        {
+          "client_id": "478194785561-gv42s88nq3gr9ne0bpne8d7h73jm30ka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHYgv2fzgF08oFwnLU3LgpmVXwgKCm1HE"
+        },
+        {
+          "current_key": "AIzaSyAW4ZayLIZGbKo2NHUVlwj7bKha-nVvqt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "478194785561-gv42s88nq3gr9ne0bpne8d7h73jm30ka.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "478194785561-bght1l3ds1p3sqf5m78voerecp66dgia.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ashcoin.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478194785561:android:575b3673a131c096df7988",
+        "android_client_info": {
+          "package_name": "com.ashprotocol.staking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "478194785561-gv42s88nq3gr9ne0bpne8d7h73jm30ka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHYgv2fzgF08oFwnLU3LgpmVXwgKCm1HE"
+        },
+        {
+          "current_key": "AIzaSyAW4ZayLIZGbKo2NHUVlwj7bKha-nVvqt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "478194785561-gv42s88nq3gr9ne0bpne8d7h73jm30ka.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "478194785561-bght1l3ds1p3sqf5m78voerecp66dgia.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ashcoin.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

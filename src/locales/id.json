@@ -1,0 +1,19 @@
+{
+  "dashboard": {
+    "greeting": "Koneksi Node,",
+    "balance_label": "SALDO PROTOKOL ASH",
+    "mainnet_asset": "Aset Mainnet",
+    "hashrate": "KECEPATAN MENAMBANG",
+    "mine_now": "TAMBANG SEKARANG",
+    "claim_mined": "KLAIM HASIL",
+    "claim_daily": "KLAIM BONUS HARIAN",
+    "daily_claimed": "BONUS HARIAN DIKLAIM",
+    "bonus_alert_title": "🎉 Bonus Harian Diklaim!",
+    "bonus_alert_msg": "Selamat! Kamu berhasil mendapatkan 0.005 ASH dari bonus harian.",
+    "bonus_alert_btn": "Mantap!",
+    "standard_boost": "Boost Standar",
+    "premium_boost": "Boost Premium",
+    "active": "Aktif",
+    "free": "GRATIS"
+  }
+}

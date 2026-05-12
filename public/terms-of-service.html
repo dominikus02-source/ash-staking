@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — ASH Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #fbbf24;
+    --cyan: #00f2ff;
+    --bg: #080c14;
+    --bg2: #0f172a;
+    --bg3: #1e293b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e293b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,242,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,242,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container { max-width: 780px; margin: 0 auto; padding: 0 24px 80px; position: relative; z-index: 1; }
+  header { padding: 60px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .logo-icon { width: 40px; height: 40px; background: var(--cyan); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-weight: 700; color: #0f172a; font-size: 16px; }
+  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--cyan); }
+  h1 { font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px; }
+  h1 span { color: var(--gold); }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .meta-item { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .meta-item strong { color: var(--cyan); display: block; font-size: 10px; margin-bottom: 2px; }
+  .toc { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 12px; padding: 24px 28px; margin-bottom: 48px; }
+  .toc-title { font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; font-family: 'Space Mono', monospace; }
+  .toc ol { list-style: none; counter-reset: toc; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  @media (max-width: 500px) { .toc ol { grid-template-columns: 1fr; } }
+  .toc li { counter-increment: toc; font-size: 14px; color: var(--muted); }
+  .toc li::before { content: counter(toc, decimal-leading-zero) ". "; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--cyan); margin-right: 4px; }
+  .toc a { color: inherit; text-decoration: none; }
+  .toc a:hover { color: var(--text); }
+  section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  h2 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .section-num { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--cyan); background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.2); border-radius: 6px; padding: 2px 8px; flex-shrink: 0; }
+  p { font-size: 15px; color: #94a3b8; margin-bottom: 16px; }
+  ul, ol { margin: 0 0 16px 0; padding-left: 0; list-style: none; }
+  li { font-size: 15px; color: #94a3b8; padding: 6px 0 6px 20px; position: relative; }
+  li::before { content: '▸'; position: absolute; left: 0; color: var(--cyan); font-size: 10px; top: 9px; }
+  .info-box { background: rgba(0,242,255,0.05); border: 1px solid rgba(0,242,255,0.15); border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .info-box p { color: #7dd3fc; margin: 0; font-size: 14px; }
+  .warn-box { background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .warn-box p { color: #fcd34d; margin: 0; font-size: 14px; }
+  .danger-box { background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .danger-box p { color: #fca5a5; margin: 0; font-size: 14px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  .contact-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; }
+  .contact-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+  .contact-card p { margin-bottom: 20px; font-size: 14px; }
+  .contact-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .contact-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; font-family: 'Space Mono', monospace; }
+  .contact-link.primary { background: var(--cyan); color: #0f172a; }
+  .contact-link.secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .contact-link:hover { opacity: 0.85; transform: translateY(-1px); }
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  footer p { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin: 0; }
+  .footer-badge { background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.2); color: var(--cyan); font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; letter-spacing: 1px; }
+  a { color: var(--cyan); }
+  strong { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">A</div>
+      <div class="logo-text">ASH PROTOCOL</div>
+    </div>
+    <h1>Terms of <span>Service</span></h1>
+    <div class="meta">
+      <div class="meta-item"><strong>EFFECTIVE DATE</strong>May 10, 2026</div>
+      <div class="meta-item"><strong>LAST UPDATED</strong>May 10, 2026</div>
+      <div class="meta-item"><strong>VERSION</strong>1.0.0</div>
+      <div class="meta-item"><strong>APP</strong>ASH COIN — com.ashcoin.app</div>
+    </div>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">TABLE OF CONTENTS</div>
+    <ol>
+      <li><a href="#s1">Acceptance of Terms</a></li>
+      <li><a href="#s2">Eligibility</a></li>
+      <li><a href="#s3">Account Registration</a></li>
+      <li><a href="#s4">Mining & Tokens</a></li>
+      <li><a href="#s5">Prohibited Conduct</a></li>
+      <li><a href="#s6">Intellectual Property</a></li>
+      <li><a href="#s7">Disclaimers & Risk</a></li>
+      <li><a href="#s8">Limitation of Liability</a></li>
+      <li><a href="#s9">Termination</a></li>
+      <li><a href="#s10">Governing Law</a></li>
+    </ol>
+  </div>
+
+  <div class="warn-box">
+    <p>⚠️ Please read these Terms of Service carefully before using the ASH COIN App. By accessing or using our App, you agree to be bound by these terms. If you do not agree, do not use the App.</p>
+  </div>
+
+  <section id="s1">
+    <h2><span class="section-num">01</span> Acceptance of Terms</h2>
+    <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User") and ASH Protocol ("Company", "we", "us") governing your use of the ASH COIN mobile application ("App").</p>
+    <p>By downloading, installing, or using the App, you confirm that you have read, understood, and agree to these Terms and our Privacy Policy. We may update these Terms at any time with notice through the App.</p>
+  </section>
+
+  <section id="s2">
+    <h2><span class="section-num">02</span> Eligibility</h2>
+    <p>To use the App, you must:</p>
+    <ul>
+      <li>Be at least 13 years of age (or the minimum age in your jurisdiction)</li>
+      <li>Have the legal capacity to enter into binding agreements</li>
+      <li>Not be prohibited from using the App under applicable laws</li>
+      <li>Not be located in a jurisdiction where cryptocurrency activities are prohibited</li>
+    </ul>
+    <div class="info-box">
+      <p>Users in certain jurisdictions may face restrictions on cryptocurrency activities. It is your responsibility to comply with local laws and regulations regarding digital tokens and mining activities.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2><span class="section-num">03</span> Account Registration</h2>
+    <p>To access the App's features, you must create an account. You agree to:</p>
+    <ul>
+      <li>Provide accurate and complete information during registration</li>
+      <li>Maintain the security of your account credentials</li>
+      <li>Notify us immediately of any unauthorized account access</li>
+      <li>Be responsible for all activities conducted under your account</li>
+      <li>Not create multiple accounts or share accounts with others</li>
+      <li>Complete KYC verification when required for withdrawals</li>
+    </ul>
+    <p>We reserve the right to suspend or terminate accounts that violate these requirements.</p>
+  </section>
+
+  <section id="s4">
+    <h2><span class="section-num">04</span> Mining & ASH Tokens</h2>
+    <p>The App allows you to mine ASH tokens through our Proof of Interaction (PoI) system. You acknowledge that:</p>
+    <ul>
+      <li>ASH tokens are currently in a pre-mainnet phase and may have no monetary value</li>
+      <li>Mining rewards are calculated by our servers based on hashrate and session duration</li>
+      <li>Mining sessions last up to 6 hours and must be manually claimed</li>
+      <li>Boost features (Standard and Premium) increase hashrate temporarily</li>
+      <li>Daily bonuses are limited to one claim per calendar day</li>
+      <li>We reserve the right to adjust mining rates, rewards, and token economics at any time</li>
+      <li>Token withdrawal policies and rates will be announced at mainnet launch</li>
+    </ul>
+    <div class="danger-box">
+      <p>🚨 ASH tokens do not represent equity, debt, or ownership in ASH Protocol. Participation in mining does not guarantee any financial return. Token values may be zero.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2><span class="section-num">05</span> Prohibited Conduct</h2>
+    <p>You agree not to engage in any of the following:</p>
+    <ul>
+      <li>Using bots, scripts, or automated tools to mine or interact with the App</li>
+      <li>Attempting to manipulate mining rewards or balances</li>
+      <li>Creating fake accounts or using another person's identity</li>
+      <li>Circumventing any security measures or access controls</li>
+      <li>Reverse engineering, decompiling, or modifying the App</li>
+      <li>Using the App for money laundering or illegal financial activities</li>
+      <li>Harassing other users in community features</li>
+      <li>Spreading false information about ASH Protocol or its token</li>
+      <li>Exploiting bugs or vulnerabilities without reporting them</li>
+    </ul>
+    <p>Violations may result in immediate account termination and forfeiture of mined tokens.</p>
+  </section>
+
+  <section id="s6">
+    <h2><span class="section-num">06</span> Intellectual Property</h2>
+    <p>The App and all its content — including but not limited to code, graphics, logos, and the ASH Protocol brand — are owned by ASH Protocol and protected by intellectual property laws.</p>
+    <ul>
+      <li>You are granted a limited, non-exclusive license to use the App for personal purposes</li>
+      <li>You may not copy, modify, distribute, or create derivative works from the App</li>
+      <li>The ASH COIN name, logo, and related marks are trademarks of ASH Protocol</li>
+      <li>User-generated content (display names, community posts) remains your property</li>
+    </ul>
+  </section>
+
+  <section id="s7">
+    <h2><span class="section-num">07</span> Disclaimers & Risk</h2>
+    <div class="danger-box">
+      <p>🚨 THE APP IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. WE DO NOT GUARANTEE UNINTERRUPTED SERVICE, ACCURACY OF MINING CALCULATIONS, OR THE FUTURE VALUE OF ASH TOKENS.</p>
+    </div>
+    <p>You acknowledge and accept the following risks:</p>
+    <ul>
+      <li><strong>Token Risk:</strong> ASH tokens may have no value now or in the future</li>
+      <li><strong>Regulatory Risk:</strong> Cryptocurrency regulations may change in your jurisdiction</li>
+      <li><strong>Technical Risk:</strong> The App may experience downtime, bugs, or data loss</li>
+      <li><strong>Market Risk:</strong> Digital token markets are highly volatile</li>
+      <li><strong>Security Risk:</strong> No digital system is completely secure</li>
+    </ul>
+  </section>
+
+  <section id="s8">
+    <h2><span class="section-num">08</span> Limitation of Liability</h2>
+    <p>To the maximum extent permitted by applicable law, ASH Protocol shall not be liable for:</p>
+    <ul>
+      <li>Loss of ASH tokens due to account termination for Terms violations</li>
+      <li>Loss of mining rewards due to technical failures or downtime</li>
+      <li>Any indirect, incidental, or consequential damages</li>
+      <li>Financial losses related to token value fluctuations</li>
+      <li>Unauthorized access to your account by third parties</li>
+    </ul>
+    <p>Our total liability to you shall not exceed the amount you paid for any premium services in the 12 months preceding the claim.</p>
+  </section>
+
+  <section id="s9">
+    <h2><span class="section-num">09</span> Termination</h2>
+    <p>Either party may terminate the relationship at any time:</p>
+    <ul>
+      <li>You may delete your account at any time through the App settings</li>
+      <li>We may suspend or terminate your account for Terms violations</li>
+      <li>We may discontinue the App with reasonable notice to users</li>
+      <li>Upon termination, your right to use the App ceases immediately</li>
+    </ul>
+    <div class="warn-box">
+      <p>⚠️ If your account is terminated for Terms violations, you may forfeit any accumulated ASH token balance. Ensure you comply with all Terms to protect your mining rewards.</p>
+    </div>
+  </section>
+
+  <section id="s10">
+    <h2><span class="section-num">10</span> Governing Law & Disputes</h2>
+    <p>These Terms are governed by the laws of Indonesia. Any disputes arising from these Terms or your use of the App shall be resolved through:</p>
+    <ul>
+      <li>Good faith negotiation as a first step</li>
+      <li>Mediation if negotiation fails within 30 days</li>
+      <li>Binding arbitration as a final resort</li>
+    </ul>
+    <p>If you have questions or concerns, please contact us before initiating any legal proceedings.</p>
+
+    <div class="contact-card">
+      <h3>Get in Touch</h3>
+      <p>Questions about our Terms? We're happy to help clarify anything.</p>
+      <div class="contact-links">
+        <a href="mailto:dominikus.02@gmail.com" class="contact-link primary">✉ Email Us</a>
+        <a href="https://t.me/ashcoin_official" class="contact-link secondary">Telegram</a>
+        <a href="https://discord.gg/ashprotocol" class="contact-link secondary">Discord</a>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <div class="info-box">
+    <p>These Terms were last updated on May 10, 2026. We will notify users of material changes via in-app notification. Your continued use of the App constitutes acceptance of the updated Terms.</p>
+  </div>
+
+  <footer>
+    <p>© 2026 ASH Protocol. All rights reserved.</p>
+    <div class="footer-badge">TERMS OF SERVICE v1.0</div>
+    <p>com.ashcoin.app</p>
+  </footer>
+</div>
+</body>
+</html>
