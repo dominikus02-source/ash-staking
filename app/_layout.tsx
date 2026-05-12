@@ -7,7 +7,7 @@ import { useFonts } from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeNotifications } from '../src/services/notifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,6 +26,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      // Initialize local notifications
+      initializeNotifications().catch(console.error);
     }
   }, [loaded]);
 
@@ -33,7 +35,7 @@ export default function RootLayout() {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#667eea" />
-        <Text style={styles.loadingText}>Loading ASH STAKING...</Text>
+        <Text style={styles.loadingText}>Loading ASH COIN STAKING...</Text>
       </View>
     );
   }

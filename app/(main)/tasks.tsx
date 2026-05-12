@@ -33,6 +33,7 @@ import {
   BarChart2,
   Send,
 } from 'lucide-react-native';
+import { notifyTaskCompleted, scheduleDailyTaskReminder } from '../../src/services/notifications';
 
 interface Task {
   id: string;
@@ -237,6 +238,10 @@ export default function TasksScreen() {
           onPress: async () => {
             setCompletedTasks([...completedTasks, task.id]);
             setTotalEarned(totalEarned + task.reward);
+            
+            // Send notification
+            await notifyTaskCompleted(task.title, task.reward.toString());
+            
             Alert.alert('Success!', `You earned ${task.reward} ASH!`);
           },
         },

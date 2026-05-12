@@ -23,6 +23,7 @@ import {
   ArrowUpRight,
   Gift,
 } from 'lucide-react-native';
+import { notifyStakingComplete, scheduleStakingReminder, notifyStakingReward } from '../../src/services/notifications';
 
 const { width } = Dimensions.get('window');
 
@@ -142,7 +143,7 @@ export default function StakingScreen() {
     return reward.toFixed(2);
   };
 
-  const handleStake = () => {
+  const handleStake = async () => {
     if (!selectedPackage || !stakeAmount) {
       Alert.alert('Error', 'Please enter an amount to stake.');
       return;
@@ -159,6 +160,8 @@ export default function StakingScreen() {
       return;
     }
 
+    const reward = (amount * selectedPackage.apy / 100) * (selectedPackage.duration / 365);
+
     Alert.alert(
       'Confirm Stake',
       `Stake ${stakeAmount} ASH for ${selectedPackage.durationLabel} at ${selectedPackage.apy}% APY?`,
@@ -166,9 +169,25 @@ export default function StakingScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
-          onPress: () => {
+          onPress: async () => {
             setShowModal(false);
             setStakeAmount('');
+            
+            // Schedule notification for staking maturity
+            const durationMs = selectedPackage.duration * 24 * 60 * 60 * 1000;
+            await scheduleStakingReminder(
+              `stake_${Date.now()}`,
+              selectedPackage.name,
+              durationMs / 1000
+            );
+            
+            // Also notify immediately that stake was created
+            await notifyStakingComplete(
+              selectedPackage.name,
+              stakeAmount,
+              reward.toFixed(2)
+            );
+            
             Alert.alert('Success', 'Your stake has been created successfully!');
           },
         },

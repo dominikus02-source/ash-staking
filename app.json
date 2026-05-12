@@ -64,6 +64,14 @@
           "photosPermission": "Allow ASH COIN STAKING to access your photos to update your profile picture.",
           "cameraPermission": "Allow ASH COIN STAKING to access your camera to take profile photos."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/ash-icon.png",
+          "color": "#667eea",
+          "sounds": []
+        }
       ]
     ],
     "experiments": {

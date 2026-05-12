@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react-native';
 import { auth, subscribeToUserData, signOut, UserData, updateTradingBalance, addTransaction } from '../../src/lib/firebase';
+import { notifyWithdrawalInitiated } from '../../src/services/notifications';
 
 interface WalletData {
   fundingBalance: number;
@@ -115,6 +116,10 @@ export default function WalletScreen() {
       
       setShowWithdrawModal(false);
       setWithdrawAmount('');
+      
+      // Send notification
+      await notifyWithdrawalInitiated(amount.toString());
+      
       Alert.alert(
         'Withdrawal Initiated',
         `Your withdrawal of ${amount} ASH is being processed. Funds will be transferred to your bank account within 1-3 business days.`,
