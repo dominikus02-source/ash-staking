@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,10 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Wallet,
-  CreditCard,
-  ArrowUpRight,
   ArrowDownLeft,
-  Clock,
+  ArrowUpRight,
   Copy,
   Lock,
   Eye,
@@ -24,41 +24,106 @@ import {
   ChevronRight,
   TrendingUp,
   PiggyBank,
+  Banknote,
+  X,
 } from 'lucide-react-native';
+import { auth, subscribeToUserData, signOut, UserData, updateTradingBalance, addTransaction } from '../../src/lib/firebase';
 
 interface WalletData {
-  fundingBalance: string;
-  tradingBalance: string;
-  totalBalance: string;
+  fundingBalance: number;
+  tradingBalance: number;
+  totalBalance: number;
   isFundingLocked: boolean;
 }
 
 export default function WalletScreen() {
   const router = useRouter();
-  const [walletData, setWalletData] = useState<WalletData>({
-    fundingBalance: '0.00',
-    tradingBalance: '0.00',
-    totalBalance: '0.00',
-    isFundingLocked: true,
-  });
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [showBalances, setShowBalances] = useState(true);
   const [selectedTab, setSelectedTab] = useState<'all' | 'funding' | 'trading'>('all');
+  
+  // Withdrawal State
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
 
   useEffect(() => {
-    loadWalletData();
+    const unsubscribe = subscribeToUserData(auth.currentUser?.uid || '', (data) => {
+      setUserData(data);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const loadWalletData = async () => {
+  const handleDeposit = () => {
+    router.push('/(main)/buy');
+  };
+
+  const handleWithdraw = () => {
+    // Check if bank account is set
+    if (!(userData as any)?.bankAccount?.bankName) {
+      Alert.alert(
+        'Bank Account Required',
+        'Please add your bank account first to withdraw funds.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Add Bank Account', onPress: () => router.push('/(main)/profile') },
+        ]
+      );
+      return;
+    }
+    
+    setShowWithdrawModal(true);
+  };
+
+  const handleConfirmWithdraw = async () => {
+    if (!auth.currentUser || !userData) return;
+    
+    const amount = parseFloat(withdrawAmount);
+    
+    if (!amount || amount <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount.');
+      return;
+    }
+    
+    if (amount < 10) {
+      Alert.alert('Error', 'Minimum withdrawal is 10 ASH.');
+      return;
+    }
+    
+    if (amount > userData.tradingBalance) {
+      Alert.alert('Error', 'Insufficient balance.');
+      return;
+    }
+
+    setWithdrawLoading(true);
+    
     try {
-      // Mock data - Replace with actual data from your backend
-      setWalletData({
-        fundingBalance: '250.00',
-        tradingBalance: '984.56',
-        totalBalance: '1,234.56',
-        isFundingLocked: true,
+      // Deduct from trading balance
+      await updateTradingBalance(auth.currentUser.uid, amount, 'subtract');
+      
+      // Add transaction
+      const bankAccount = (userData as any).bankAccount;
+      await addTransaction(auth.currentUser.uid, {
+        type: 'out',
+        category: 'withdraw',
+        title: `Withdraw to ${bankAccount.bankName} ****${bankAccount.accountNumber.slice(-4)}`,
+        amount: amount,
+        balanceAfter: userData.tradingBalance - amount,
+        status: 'pending',
       });
-    } catch (error) {
-      console.log('Error loading wallet data:', error);
+      
+      setShowWithdrawModal(false);
+      setWithdrawAmount('');
+      Alert.alert(
+        'Withdrawal Initiated',
+        `Your withdrawal of ${amount} ASH is being processed. Funds will be transferred to your bank account within 1-3 business days.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to process withdrawal.');
+    } finally {
+      setWithdrawLoading(false);
     }
   };
 
@@ -66,19 +131,7 @@ export default function WalletScreen() {
     Alert.alert('Copied', 'Wallet address copied to clipboard');
   };
 
-  const handleDeposit = () => {
-    router.push('/(main)/buy');
-  };
-
-  const handleWithdraw = () => {
-    Alert.alert('Withdraw', 'Withdraw feature coming soon');
-  };
-
-  const handleTransfer = () => {
-    Alert.alert('Transfer', 'Transfer between wallets coming soon');
-  };
-
-  const renderTab = (tab: 'all' | 'funding' | 'trading', title: string, balance: string) => (
+  const renderTab = (tab: 'all' | 'funding' | 'trading', title: string, balance: number) => (
     <TouchableOpacity
       key={tab}
       style={[styles.tab, selectedTab === tab && styles.tabActive]}
@@ -88,10 +141,12 @@ export default function WalletScreen() {
         {title}
       </Text>
       <Text style={[styles.tabBalance, selectedTab === tab && styles.tabBalanceActive]}>
-        {showBalances ? `${balance} ASH` : '••••••'}
+        {showBalances ? `${balance.toFixed(2)} ASH` : '••••••'}
       </Text>
     </TouchableOpacity>
   );
+
+  const totalBalance = (userData?.fundingBalance || 0) + (userData?.tradingBalance || 0);
 
   const renderTransaction = (tx: any, index: number) => (
     <View key={index} style={styles.transactionItem}>
@@ -115,12 +170,12 @@ export default function WalletScreen() {
     </View>
   );
 
+  // Mock transactions for display
   const transactions = [
     { title: 'Staking Reward', type: 'in', amount: '+12.50 ASH', date: 'Today, 09:30' },
     { title: 'Task Completed', type: 'in', amount: '+5.00 ASH', date: 'Today, 08:15' },
     { title: 'Stake Deposit', type: 'out', amount: '-50.00 ASH', date: 'Yesterday' },
     { title: 'Referral Bonus', type: 'in', amount: '+2.50 ASH', date: '2 days ago' },
-    { title: 'Buy ASH', type: 'in', amount: '+100.00 ASH', date: '3 days ago' },
   ];
 
   return (
@@ -147,18 +202,18 @@ export default function WalletScreen() {
         >
           <Text style={styles.balanceLabel}>Total Balance</Text>
           <Text style={styles.balanceAmount}>
-            {showBalances ? walletData.totalBalance : '••••••'} ASH
+            {showBalances ? totalBalance.toFixed(2) : '••••••'} ASH
           </Text>
           
           {/* Wallet Tabs */}
           <View style={styles.tabs}>
-            {renderTab('all', 'All', walletData.totalBalance)}
-            {renderTab('funding', 'Funding', walletData.fundingBalance)}
-            {renderTab('trading', 'Trading', walletData.tradingBalance)}
+            {renderTab('all', 'All', totalBalance)}
+            {renderTab('funding', 'Funding', userData?.fundingBalance || 0)}
+            {renderTab('trading', 'Trading', userData?.tradingBalance || 0)}
           </View>
 
           {/* Lock Notice for Funding Wallet */}
-          {walletData.isFundingLocked && (
+          {userData?.fundingBalance && userData.fundingBalance > 0 && (
             <View style={styles.lockNotice}>
               <Lock size={14} color="#ffffff" />
               <Text style={styles.lockText}>Funding wallet locked from mining app</Text>
@@ -188,7 +243,7 @@ export default function WalletScreen() {
             <Text style={styles.actionText}>Withdraw</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} onPress={handleTransfer}>
+          <TouchableOpacity style={styles.actionButton}>
             <LinearGradient
               colors={['#4facfe', '#00f2fe']}
               style={styles.actionIconBg}
@@ -203,46 +258,132 @@ export default function WalletScreen() {
         <View style={styles.statsCard}>
           <View style={styles.statItem}>
             <PiggyBank size={24} color="#667eea" />
-            <Text style={styles.statValue}>3</Text>
+            <Text style={styles.statValue}>{userData?.stakes?.length || 0}</Text>
             <Text style={styles.statLabel}>Active Stakes</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <TrendingUp size={24} color="#4caf50" />
-            <Text style={styles.statValue}>89.45</Text>
+            <Text style={styles.statValue}>{(userData?.totalEarned || 0).toFixed(2)}</Text>
             <Text style={styles.statLabel}>Total Earned</Text>
           </View>
         </View>
 
-        {/* Wallet Address */}
-        <View style={styles.addressCard}>
-          <View style={styles.addressHeader}>
-            <Wallet size={20} color="#667eea" />
-            <Text style={styles.addressTitle}>ASH Wallet Address</Text>
+        {/* Bank Account Card */}
+        <TouchableOpacity style={styles.bankCard} onPress={() => router.push('/(main)/profile')}>
+          <View style={styles.bankIcon}>
+            <Banknote size={24} color="#667eea" />
           </View>
-          <View style={styles.addressRow}>
-            <Text style={styles.addressText} numberOfLines={1}>
-              0x1234...5678...ABCD...EFGH
-            </Text>
-            <TouchableOpacity onPress={copyAddress}>
-              <Copy size={18} color="#667eea" />
-            </TouchableOpacity>
+          <View style={styles.bankInfo}>
+            <Text style={styles.bankLabel}>Bank Account</Text>
+            {(userData as any)?.bankAccount?.bankName ? (
+              <Text style={styles.bankValue}>
+                {(userData as any).bankAccount.bankName} ****{(userData as any).bankAccount.accountNumber?.slice(-4)}
+              </Text>
+            ) : (
+              <Text style={styles.bankEmpty}>Add bank account</Text>
+            )}
           </View>
-        </View>
+          <ChevronRight size={20} color="#c7c7cc" />
+        </TouchableOpacity>
 
         {/* Recent Transactions */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(main)/history')}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.transactionsCard}>
-            {transactions.slice(0, 4).map(renderTransaction)}
+            {transactions.map(renderTransaction)}
           </View>
         </View>
       </ScrollView>
+
+      {/* Withdraw Modal */}
+      <Modal
+        visible={showWithdrawModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowWithdrawModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Withdraw ASH</Text>
+              <TouchableOpacity onPress={() => setShowWithdrawModal(false)}>
+                <X size={24} color="#8e8e93" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              {/* Balance Info */}
+              <View style={styles.withdrawBalance}>
+                <Text style={styles.withdrawBalanceLabel}>Available Balance</Text>
+                <Text style={styles.withdrawBalanceValue}>
+                  {userData?.tradingBalance?.toFixed(2) || '0.00'} ASH
+                </Text>
+              </View>
+
+              {/* Bank Account Info */}
+              <View style={styles.withdrawBank}>
+                <Text style={styles.withdrawBankLabel}>To Bank Account</Text>
+                <Text style={styles.withdrawBankValue}>
+                  {(userData as any)?.bankAccount?.bankName} - ****{(
+                    userData as any
+                  )?.bankAccount?.accountNumber?.slice(-4)}
+                </Text>
+              </View>
+
+              {/* Amount Input */}
+              <View style={styles.amountInput}>
+                <Text style={styles.inputLabel}>Amount (ASH)</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter amount"
+                    placeholderTextColor="#8e8e93"
+                    value={withdrawAmount}
+                    onChangeText={setWithdrawAmount}
+                    keyboardType="numeric"
+                  />
+                  <TouchableOpacity 
+                    style={styles.maxButton}
+                    onPress={() => setWithdrawAmount((userData?.tradingBalance || 0).toString())}
+                  >
+                    <Text style={styles.maxText}>MAX</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.inputHint}>Minimum withdrawal: 10 ASH</Text>
+              </View>
+
+              {/* Warning */}
+              <View style={styles.warningBox}>
+                <Text style={styles.warningText}>
+                  Withdrawal will be processed within 1-3 business days. A small network fee may apply.
+                </Text>
+              </View>
+
+              {/* Withdraw Button */}
+              <TouchableOpacity 
+                style={[styles.withdrawButton, withdrawLoading && styles.withdrawButtonDisabled]}
+                onPress={handleConfirmWithdraw}
+                disabled={withdrawLoading}
+              >
+                <LinearGradient
+                  colors={['#667eea', '#764ba2']}
+                  style={styles.withdrawGradient}
+                >
+                  <Text style={styles.withdrawButtonText}>
+                    {withdrawLoading ? 'Processing...' : 'Confirm Withdrawal'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -340,7 +481,7 @@ const styles = StyleSheet.create({
   },
   actionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     paddingHorizontal: 20,
     marginTop: 24,
   },
@@ -398,7 +539,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     marginHorizontal: 16,
   },
-  addressCard: {
+  bankCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#ffffff',
     marginHorizontal: 20,
     marginTop: 16,
@@ -407,33 +550,36 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: 8,
     elevation: 4,
   },
-  addressHeader: {
-    flexDirection: 'row',
+  bankIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#f0f0ff',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
+    marginRight: 14,
   },
-  addressTitle: {
+  bankInfo: {
+    flex: 1,
+  },
+  bankLabel: {
+    fontSize: 13,
+    color: '#8e8e93',
+  },
+  bankValue: {
     fontSize: 15,
     fontWeight: '600',
     color: '#1c1c1e',
+    marginTop: 2,
   },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#f5f5f7',
-    borderRadius: 10,
-    padding: 12,
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#8e8e93',
-    fontFamily: 'monospace',
-    flex: 1,
+  bankEmpty: {
+    fontSize: 15,
+    color: '#667eea',
+    fontWeight: '500',
+    marginTop: 2,
   },
   section: {
     marginTop: 28,
@@ -495,6 +641,130 @@ const styles = StyleSheet.create({
   },
   txAmount: {
     fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1c1c1e',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  withdrawBalance: {
+    backgroundColor: '#f5f5f7',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  withdrawBalanceLabel: {
+    fontSize: 13,
+    color: '#8e8e93',
+  },
+  withdrawBalanceValue: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1c1c1e',
+    marginTop: 4,
+  },
+  withdrawBank: {
+    backgroundColor: '#f0f0ff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  withdrawBankLabel: {
+    fontSize: 13,
+    color: '#667eea',
+  },
+  withdrawBankValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1c1c1e',
+    marginTop: 4,
+  },
+  amountInput: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1c1c1e',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f7',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+  },
+  input: {
+    flex: 1,
+    height: 52,
+    fontSize: 17,
+    color: '#1c1c1e',
+  },
+  maxButton: {
+    backgroundColor: '#667eea',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  maxText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  inputHint: {
+    fontSize: 12,
+    color: '#8e8e93',
+    marginTop: 8,
+  },
+  warningBox: {
+    backgroundColor: '#fff3e0',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+  },
+  warningText: {
+    fontSize: 13,
+    color: '#ff9500',
+    lineHeight: 18,
+  },
+  withdrawButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  withdrawButtonDisabled: {
+    opacity: 0.6,
+  },
+  withdrawGradient: {
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  withdrawButtonText: {
+    color: '#ffffff',
+    fontSize: 17,
     fontWeight: '600',
   },
 });

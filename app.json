@@ -10,27 +10,43 @@
     "splash": {
       "image": "./assets/images/ash-splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#667eea"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ashprotocol.staking",
+      "bundleIdentifier": "com.ashcoin.staking",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Use Face ID for quick and secure login"
+        "NSFaceIDUsageDescription": "Use Face ID for quick and secure login",
+        "NSPhotoLibraryUsageDescription": "We need access to your photos to update your profile picture",
+        "NSCameraUsageDescription": "We need camera access to take profile photos"
+      },
+      "buildNumber": "1",
+      "appTransportSecurity": {
+        "exceptionDomains": []
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#667eea"
       },
-      "package": "com.ashprotocol.staking",
+      "package": "com.ashcoin.staking",
       "googleServicesFile": "./google-services.json",
+      "versionCode": 1,
       "permissions": [
         "USE_BIOMETRIC",
-        "USE_FINGERPRINT"
-      ]
+        "USE_FINGERPRINT",
+        "INTERNET",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "config": {
+        "googleSignIn": {
+          "certificateHash": "532d5c34c240a248d5d4af5419f2a1f27beef8b4"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +54,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow ASH COIN STAKING to access your photos to update your profile picture.",
+          "cameraPermission": "Allow ASH COIN STAKING to access your camera to take profile photos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -46,7 +69,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ash-staking-project"
+        "projectId": "ash-coin-staking"
       }
     }
   }
