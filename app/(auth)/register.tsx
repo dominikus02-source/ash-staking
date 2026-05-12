@@ -17,8 +17,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Mail, Lock, User, Gift } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth, registerUser } from '../../src/lib/firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db } from '../../src/lib/firebase';
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -100,13 +101,31 @@ export default function RegisterScreen() {
       await createUserWithEmailAndPassword(auth, formData.email.trim(), formData.password);
       await updateProfile(auth.currentUser!, { displayName: formData.fullName.trim() });
       
-      // Store user data in Firestore
-      await registerUser(
-        formData.email.trim(),
-        formData.password,
-        formData.fullName.trim(),
-        formData.referralCode.trim() || undefined
-      );
+      // Create user document
+      const user = auth.currentUser!;
+      const referralCode = user.uid.substring(0, 6).toUpperCase();
+      
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: formData.fullName.trim(),
+        photoURL: null,
+        createdAt: serverTimestamp(),
+        fundingBalance: 0,
+        tradingBalance: 0,
+        stakes: [],
+        totalStaked: 0,
+        totalEarned: 0,
+        referralCode,
+        referredBy: formData.referralCode.trim().toUpperCase() || '',
+        referralCount: 0,
+        totalReferralEarnings: 0,
+        completedTasks: [],
+        totalTaskEarnings: 0,
+        lastDailyCheckIn: null,
+        kycStatus: 'none',
+        isPremium: false,
+      });
       
       // Save session
       await AsyncStorage.setItem('userSession', 'email');
@@ -124,6 +143,67 @@ export default function RegisterScreen() {
         'auth/network-request-failed': 'Network error. Please check your connection.',
       };
       Alert.alert('Registration Failed', errorMap[error.code] || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Check if user already exists
+      const { getDoc } = await import('firebase/firestore');
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (userDoc.exists()) {
+        // User exists, just login
+        await AsyncStorage.setItem('userSession', 'google');
+        router.replace('/(main)/home');
+        return;
+      }
+      
+      // Create new user with Google
+      const referralCode = user.uid.substring(0, 6).toUpperCase();
+      
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || 'User',
+        photoURL: user.photoURL,
+        createdAt: serverTimestamp(),
+        fundingBalance: 0,
+        tradingBalance: 0,
+        stakes: [],
+        totalStaked: 0,
+        totalEarned: 0,
+        referralCode,
+        referredBy: '',
+        referralCount: 0,
+        totalReferralEarnings: 0,
+        completedTasks: [],
+        totalTaskEarnings: 0,
+        lastDailyCheckIn: null,
+        kycStatus: 'none',
+        isPremium: false,
+      });
+      
+      await AsyncStorage.setItem('userSession', 'google');
+      router.replace('/onboarding');
+    } catch (error: any) {
+      console.log('Google Register Error:', error);
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        // User closed popup
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        Alert.alert('Account Exists', 'An account already exists with this email using a different sign-in method.');
+      } else {
+        Alert.alert('Registration Failed', 'Could not register with Google. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -312,6 +392,31 @@ export default function RegisterScreen() {
                   I agree to the <Text style={styles.termsLink}>Terms of Service</Text> and <Text style={styles.termsLink}>Privacy Policy</Text>
                 </Text>
               </TouchableOpacity>
+
+              {/* Google Sign In Button */}
+              <TouchableOpacity 
+                style={styles.googleButton}
+                onPress={handleGoogleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#4285F4" />
+                ) : (
+                  <>
+                    <View style={styles.googleIcon}>
+                      <Text style={styles.googleIconText}>G</Text>
+                    </View>
+                    <Text style={styles.googleButtonText}>Continue with Google</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Divider */}
+              <View style={styles.registerDivider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
 
               {/* Register Button */}
               <TouchableOpacity 
@@ -506,6 +611,51 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 17,
     fontWeight: '600',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    height: 56,
+    borderWidth: 1,
+    borderColor: '#e5e5ea',
+    gap: 12,
+    marginBottom: 16,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#4285F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  googleIconText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  googleButtonText: {
+    fontSize: 17,
+    color: '#1c1c1e',
+    fontWeight: '500',
+  },
+  registerDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e5ea',
+  },
+  dividerText: {
+    color: '#8e8e93',
+    paddingHorizontal: 16,
+    fontSize: 14,
   },
   footer: {
     flexDirection: 'row',

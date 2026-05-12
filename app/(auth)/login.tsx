@@ -17,8 +17,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Fingerprint, Mail, Lock } from 'lucide-react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth, loginUser } from '../../src/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db, registerUser } from '../../src/lib/firebase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   
   const fadeAnim = new Animated.Value(0);
@@ -37,7 +39,18 @@ export default function LoginScreen() {
       duration: 800,
       useNativeDriver: true,
     }).start();
+    
+    // Load saved email if remember me was checked
+    loadRememberedEmail();
   }, []);
+
+  const loadRememberedEmail = async () => {
+    const savedEmail = await AsyncStorage.getItem('userEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  };
 
   const handleBiometric = async () => {
     try {
@@ -97,6 +110,95 @@ export default function LoginScreen() {
       Alert.alert('Login Failed', errorMap[error.code] || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    
+    try {
+      // Check if Google Play Services are available
+      const { isPlayServicesAvailable } = await import('expo-build-properties');
+      const isAvailable = await isPlayServicesAvailable().catch(() => true);
+      
+      if (!isAvailable) {
+        Alert.alert('Error', 'Google Play Services is not available on this device.');
+        setGoogleLoading(false);
+        return;
+      }
+      
+      // Create Google provider
+      const provider = new GoogleAuthProvider();
+      
+      // Sign in with popup
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Check if user exists in Firestore, if not create new user
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        // Create new user document
+        const referralCode = user.uid.substring(0, 6).toUpperCase();
+        
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || 'User',
+          photoURL: user.photoURL,
+          createdAt: serverTimestamp(),
+          
+          // Wallet from mining (starts at 0 for new users)
+          fundingBalance: 0,
+          
+          // Trading wallet for staking
+          tradingBalance: 0,
+          
+          // Staking
+          stakes: [],
+          totalStaked: 0,
+          totalEarned: 0,
+          
+          // Referral
+          referralCode,
+          referredBy: '',
+          referralCount: 0,
+          totalReferralEarnings: 0,
+          
+          // Tasks
+          completedTasks: [],
+          totalTaskEarnings: 0,
+          lastDailyCheckIn: null,
+          
+          // Metadata
+          kycStatus: 'none',
+          isPremium: false,
+        });
+      }
+      
+      // Save session
+      await AsyncStorage.setItem('userSession', 'google');
+      
+      // Check if new user, go to onboarding
+      const hasCompletedOnboarding = await AsyncStorage.getItem('hasCompletedOnboarding');
+      
+      if (hasCompletedOnboarding) {
+        router.replace('/(main)/home');
+      } else {
+        router.replace('/onboarding');
+      }
+    } catch (error: any) {
+      console.log('Google Sign-In Error:', error);
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        // User closed popup, do nothing
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        Alert.alert('Account Exists', 'An account already exists with this email using a different sign-in method. Please sign in with email and password.');
+      } else {
+        Alert.alert('Google Sign-In Failed', 'Could not sign in with Google. Please try again.');
+      }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -228,6 +330,24 @@ export default function LoginScreen() {
               <Text style={styles.dividerText}>or</Text>
               <View style={styles.dividerLine} />
             </View>
+
+            {/* Google Sign In Button */}
+            <TouchableOpacity 
+              style={styles.googleButton}
+              onPress={handleGoogleLogin}
+              disabled={googleLoading}
+            >
+              {googleLoading ? (
+                <ActivityIndicator color="#4285F4" />
+              ) : (
+                <>
+                  <View style={styles.googleIcon}>
+                    <Text style={styles.googleIconText}>G</Text>
+                  </View>
+                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                </>
+              )}
+            </TouchableOpacity>
 
             {/* Biometric Button */}
             <TouchableOpacity 
@@ -396,6 +516,36 @@ const styles = StyleSheet.create({
     color: '#8e8e93',
     paddingHorizontal: 16,
     fontSize: 14,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    height: 56,
+    borderWidth: 1,
+    borderColor: '#e5e5ea',
+    gap: 12,
+    marginBottom: 12,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#4285F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  googleIconText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  googleButtonText: {
+    fontSize: 17,
+    color: '#1c1c1e',
+    fontWeight: '500',
   },
   biometricButton: {
     flexDirection: 'row',
